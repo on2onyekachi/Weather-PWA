@@ -52,7 +52,6 @@ function showSaved () {
         loader.className += ' hidden';
         p.innerText = (error.code === 2) ? 'Internet not connected' : error.message;
         errorDisplay.appendChild(p);
-        console.log('error handle', error)
         return;
     }
 
@@ -130,15 +129,10 @@ const recieveGeoCoord = (lat, long) => {
     fetchData(lat, long).then(response => {
         return response.json();
     }).then(data => {
-        console.log(data);
-        window.localStorage.setItem(
-            'weatherInfo', 
-            JSON.stringify(data)
-            )
-            showWeatherDetails(data);
+        window.localStorage.setItem('weatherInfo', JSON.stringify(data))
+        showWeatherDetails(data);
     }).catch(err => {
         showSaved();
-        console.log('from recieveCord error', err)
         handleError(err);
     } );
 }
@@ -164,11 +158,10 @@ const inputShield = (func, delay = 1000) => {
 const onInput = async (event) => { 
     if (event.target.value) { 
         loader.className = 'loader';
-        const movies = await inputFetch(event.target.value);
-        movies.then(response => {
+        const movies = await inputFetch(event.target.value)
+        .then(response => {
             return response.json();
         }).then(data => {
-            console.log('FROM INPUT', data);
             if (data.cod == "404") {
                 handleError(data);
             }
@@ -181,7 +174,6 @@ const onInput = async (event) => {
             }
         }).catch(err => {
             showSaved();
-            console.log('from input error', err)
             handleError(err);
         })
     } else { 

@@ -11,10 +11,10 @@ body{
     height: 100vh;
     display: flex;
     align-items: center;
-    background:  -webkit-linear-gradient(279deg, rgba(61, 140, 214, 0.986) 20%, rgba(201, 248, 248, 0.774) 90%);
-    background:     -moz-linear-gradient(279deg, rgba(61, 140, 214, 0.986) 20%, rgba(201, 248, 248, 0.774) 90%);
-    background:       -o-linear-gradient(279deg, rgba(61, 140, 214, 0.986) 20%, rgba(201, 248, 248, 0.774) 90%);
-    background:          linear-gradient(279deg, rgba(61, 140, 214, 0.986) 20%, rgba(201, 248, 248, 0.774) 90%);
+    background:  -webkit-linear-gradient(15deg, rgba(201, 248, 248, 0.774) 20%, rgba(201, 248, 248, 0.774) 90%);
+    background:     -moz-linear-gradient(15deg, rgba(201, 248, 248, 0.774) 20%, rgba(201, 248, 248, 0.774) 90%);
+    background:       -o-linear-gradient(15deg, rgba(201, 248, 248, 0.774) 20%, rgba(201, 248, 248, 0.774) 90%);
+    background:          linear-gradient(15deg, rgba(201, 248, 248, 0.774) 20%, rgba(201, 248, 248, 0.774) 90%);
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -50,10 +50,10 @@ section{
     border-radius: 15px;
     padding: 2rem;
     box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.4);
-    background:   -webkit-linear-gradient(15deg, rgba(61, 140, 214, 0.986) 20%, rgba(201, 248, 248, 0.774) 90%);
-    background:      -moz-linear-gradient(15deg, rgba(61, 140, 214, 0.986) 20%, rgba(201, 248, 248, 0.774) 90%);
-    background:        -o-linear-gradient(15deg, rgba(61, 140, 214, 0.986) 20%, rgba(201, 248, 248, 0.774) 90%);
-    background:           linear-gradient(15deg, rgba(61, 140, 214, 0.986) 20%, rgba(201, 248, 248, 0.774) 90%);
+    background:  -webkit-linear-gradient(15deg, rgba(201, 248, 248, 0.774) 20%, rgba(201, 248, 248, 0.774) 90%);
+    background:     -moz-linear-gradient(15deg, rgba(201, 248, 248, 0.774) 20%, rgba(201, 248, 248, 0.774) 90%);
+    background:       -o-linear-gradient(15deg, rgba(201, 248, 248, 0.774) 20%, rgba(201, 248, 248, 0.774) 90%);
+    background:          linear-gradient(15deg, rgba(201, 248, 248, 0.774) 20%, rgba(201, 248, 248, 0.774) 90%);
     /* background-color: rgba(201, 248, 248, 0.774); */
     opacity: 0.9;
 }
@@ -221,7 +221,6 @@ header h1 {
         font-size: 1rem;
     }
     .special .main-date{
-        /* line-height: rem; */
         font-size: 4rem;
     }
     .main-season{
@@ -233,6 +232,12 @@ header h1 {
     }
 }
 @media(max-width: 767px) {
+    body{
+        display: block;
+    }
+    section{
+        height: auto;
+    }
     .right-item{
         flex-direction: column;
     }
@@ -278,6 +283,7 @@ header h1 {
 @media(max-width: 320px) {
     .container{
       flex-direction: column-reverse;
+      margin: 0;
     }
 }
 @media(max-width: 190px) {
