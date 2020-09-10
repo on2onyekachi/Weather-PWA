@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="mask-icon" href="safari-pinned-tab.svg" color="#1f9abd">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#3367D6">
+    
+    <title>Weather App</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <section>
+        <header>
+            <img class="icon" src="./icons/unknown.png" title="Smash-It weather app" alt="App icon">
+            <h1><span class="weather">Weather </span>Forecast</h1>
+            <div class="search-wrapper">
+                <label for="search" class="search-label" >Search:</label>
+                <input type="text" id="search" placeholder="e.g New York City, US">
+            </div>
+        </header>
+        <div class="errorMessage"><p class="error"></p></div>
+        <div class="saveMessage"></div>
+        <div class="loader">
+            <img src="./icons/loader.gif" alt="loading...">
+        </div>
+        <div class="container">
+            <div class="left-item">
+                <div class="list"></div>
+            </div>
+            <div class="right-item">
+                <div class="in-left">
+                    <div class="in-center">
+                        <div class="special main-right">
+                            <div class="main">
+                                <img class="main-icon view" src="./icons/unknown.png" alt="">
+                                <h2 class="main-season season">N/R</h2>
+                            </div>
+                            <h3 class="main-date temperature">0</h3>
+                            <h2 class="main-degree">&deg;C</h2>
+                        </div>
+                        <h1 class="date weekday">N/R</h1>
+                        <h2 class="location"></h2>
+                        <h3 class="clock">N/R</h3>
+                    </div>
+                </div>
+                <div class="in-right">
+                    <img class="season-icon view" src="./icons/unknown.png" alt="">
+                </div>
+            </div>
+        </div>
+    </section>
+    <script src="script.js"></script>
+</body>
+</html>
