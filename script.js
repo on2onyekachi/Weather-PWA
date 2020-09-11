@@ -104,10 +104,13 @@ function showSaved () {
 
     function showWeatherDetails(data) {
         const list = document.querySelector('.list');
+        const eventSafe = document.querySelector('.safe');
         const {timezone} = data;
         const {temp, dt} = data.current;
-        const {description,icon} = data.current.weather[0];
+        const {description,icon, main} = data.current.weather[0];
         loader.className += ' hidden';
+
+        eventSafe.innerText = (main === 'Clear' || main === 'Clouds') ? 'Safe' : 'Not Safe';
         (!mainLocation.innerText) ? mainLocation.innerText = timezone : '';
         temperature.innerText = Math.round(temp);
         season.innerText = description;
@@ -144,7 +147,7 @@ const inputFetch = async (search) => {
 }
 
 const inputShield = (func, delay = 1000) => {
-    let timeOutID
+    let timeOutID;
     return (...args) => {
         if(timeOutID) {
             clearTimeout(timeOutID)
@@ -162,6 +165,7 @@ const onInput = async (event) => {
         .then(response => {
             return response.json();
         }).then(data => {
+            console.log('FROM INPUT', data);
             if (data.cod == "404") {
                 handleError(data);
             }
@@ -174,6 +178,7 @@ const onInput = async (event) => {
             }
         }).catch(err => {
             showSaved();
+            console.log('from input error', err)
             handleError(err);
         })
     } else { 
@@ -183,15 +188,15 @@ const onInput = async (event) => {
 
 const inputBox = document.querySelector('#search');
 inputBox.addEventListener('input', inputShield(onInput, 1000) );
-// if ('serviceWorker' in navigator) {
-//     window.addEventListener('load', function() {
-//       navigator.serviceWorker.register('./sw.js')
-//       .then(function(registration) {
-//         // Regsuccessful
-//         console.log('ServiceWorker registration successful:', registration.scope);
-//       }, function(err) {
-//         //failed 
-//         console.log('ServiceWorker registration failed: ', err);
-//       }).catch(err => err) 
-//     });
-// }
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('./sw.js')
+      .then(function(registration) {
+        // Regsuccessful
+        console.log('ServiceWorker registration successful:', registration.scope);
+      }, function(err) {
+        //failed 
+        console.log('ServiceWorker registration failed: ', err);
+      });
+    });
+}

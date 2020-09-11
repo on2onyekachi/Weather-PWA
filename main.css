@@ -172,6 +172,13 @@ header h1 {
     padding: 1rem 1rem 1.5rem 1.5rem;
     margin-bottom: 1rem;
 }
+.safe{
+    color: #d7e1e1;
+    background-color: #46bf1b;
+    text-align: center;
+    border-radius: 20px;
+    font-size: inherit;
+}
 .special .sub{
     padding: 0 0.3rem;
     margin-bottom: 1rem;
