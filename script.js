@@ -42,7 +42,7 @@ function showSaved () {
 }
     // Sending the fetch data with the user search word
     const fetchData = async (lat, long) => { //async on the 
-        const api = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${long}&exclude=hourly,minutely&units=metric&appid=63a26c5a1034a561f528c2ee51289b63`;
+        const api = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${long}&exclude=hourly,minutely&units=metric&appid=putinakey`;
         const response = await fetch(api);
         return response;
     }
@@ -141,7 +141,7 @@ const recieveGeoCoord = (lat, long) => {
 }
 
 const inputFetch = async (search) => {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${search}&appid=63a26c5a1034a561f528c2ee51289b63`;
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${search}&appid=putinakey`;
     const response = await fetch(url);
     return response; 
 }
