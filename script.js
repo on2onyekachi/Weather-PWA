@@ -2,7 +2,7 @@ const temperature = document.querySelector('.temperature');
 const season = document.querySelector('.season');
 const view = document.querySelectorAll('.view');
 const weekday = document.querySelector('.date');
-const errorDisplay = document.querySelector('.errorDisplay');
+const errorDisplay = document.querySelector('.errorMessage');
 const mainLocation = document.querySelector('.location');
 const loader = document.querySelector('.loader');
 
@@ -34,13 +34,16 @@ function showSaved() {
     const savedWeather = JSON.parse(window.localStorage.getItem('weatherInfo'));
     if (savedWeather && savedWeather.list && savedWeather.list.length > 0) {
         const lastSave = document.querySelector('.saveMessage');
-        lastSave.innerHTML = '<p class="last-save">Showing your last saved result</p>';
-        setTimeout(() => { lastSave.innerHTML = ''; }, 3000);
-        showWeatherDetails(savedWeather);
+        if (lastSave) {
+            lastSave.innerHTML = '<p class="last-save">Showing your last saved result</p>';
+            setTimeout(() => { lastSave.innerHTML = ''; }, 3000);
+            showWeatherDetails(savedWeather);
+        }
     }
 }
 
 const fetchData = async (lat, long) => {
+    loader.classList.remove('hidden');
     const api = `/.netlify/functions/weather?lat=${lat}&lon=${long}`;
     const response = await fetch(api);
     if (!response.ok) {
@@ -155,8 +158,10 @@ const receiveGeoCoord = (lat, long) => {
     fetchData(lat, long)
         .then(response => response.json())
         .then(data => {
-            window.localStorage.setItem('weatherInfo', JSON.stringify(data));
-            showWeatherDetails(data);
+            if (data && data.list) {
+                window.localStorage.setItem('weatherInfo', JSON.stringify(data));
+                showWeatherDetails(data);
+            }
         })
         .catch(err => {
             showSaved();
@@ -186,7 +191,7 @@ const onInput = async (event) => {
     const query = event.target.value.trim();
     if (!query) return;
 
-    loader.className = 'loader';
+    loader.classList.remove('hidden');
     errorDisplay.innerHTML = '';
 
     inputFetch(query)
@@ -207,9 +212,19 @@ const inputBox = document.querySelector('#search');
 inputBox.addEventListener('input', inputShield(onInput, 1000));
 
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('ServiceWorker registration successful:', reg.scope))
-            .catch(err => console.log('ServiceWorker registration failed:', err));
+    window.addEventListener('load', async () => {
+        try {
+            const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+            if (isLocal) {
+                console.log('SW disabled in local dev');
+                return;
+            }
+            const reg = await navigator.serviceWorker.register('./sw.js', {
+                scope: './'
+            });
+            console.log('ServiceWorker registered:', reg.scope);
+        } catch (err) {
+            console.error('ServiceWorker registration failed:', err);
+        }
     });
 }

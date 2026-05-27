@@ -32,15 +32,14 @@ const staticAssests = [
     './manifest.webmanifest'
 ]
 
-self.addEventListener('install', async e => {
+self.addEventListener('install', (event) => {
     console.log('SW INSTALLED');
-    e.waitUntil(
-        await caches.open(cacheName)
-        .then(function(cache) {
-            cache.addAll(staticAssests);
+    event.waitUntil(
+        caches.open(cacheName).then((cache) => {
+            return cache.addAll(staticAssests);
         })
-    )
-    return self.skipWaiting();
+    );
+    self.skipWaiting();
 });
 
 self.addEventListener('activate', e => {
@@ -48,31 +47,34 @@ self.addEventListener('activate', e => {
     self.clients.claim();
 });
 
-self.addEventListener('fetch', async e => {
-    const req = e.request;
+self.addEventListener('fetch', (event) => {
+    const req = event.request;
     const url = new URL(req.url);
-    try {
-        if(url.origin === location.origin) {
-            e.respondWith(cacheFirst(req));
-        } else {
-            e.respondWith(networkAndCache(req));
-        } 
-    } catch (e) {
-        return e;
+
+    if (url.pathname.startsWith('/.netlify/functions/')) {
+        event.respondWith(fetch(req));
+        return;
     }
-})
+    if (url.origin === location.origin) {
+        event.respondWith(cacheFirst(req));
+    } else {
+        event.respondWith(networkAndCache(req));
+    }
+});
 
 async function cacheFirst(req) {
     const cache = await caches.open(cacheName);
     const cached = await cache.match(req);
-    return cached || fetch(cache)
+    return cached || fetch(req)
 }
 
 async function networkAndCache(req) {
     const cache = await caches.open(cacheName);
     try {
         const fresh = await fetch(req);
-        await cache.put(req, fresh.clone());
+        if (!fresh.ok) return fresh;
+        
+        cache.put(req, fresh.clone());
         return fresh;
     } catch (e) {
         const cached = await cache.match(req);

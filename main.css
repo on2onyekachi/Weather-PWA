@@ -62,7 +62,6 @@ header{
     justify-content: space-between;
 }
 header h1 {
-    width: 300px;
     margin-left: 5rem;
     text-transform: uppercase;
 }
