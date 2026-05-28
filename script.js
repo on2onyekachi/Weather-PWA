@@ -77,8 +77,7 @@ function renderOption(data) {
             <h2 class="sub-season">${main}</h2>
         </div>
         <p class="style weekday">${day}</p>
-        <h3 class="side-temp">${Math.round(temp_max)} <span class='low-side-temp'>${Math.round(temp_min)}</span></h3>
-        <h4 class="degree">&deg;C</h4>
+        <h3 class="side-temp">${Math.round(temp_max)} <span class='low-side-temp'>${Math.round(temp_min)}</span> <span class="degree">&deg;C</span></h3>
     </div>`;
 }
 
@@ -128,12 +127,25 @@ function showWeatherDetails(data) {
 
     loader.classList.add('hidden');
     eventSafe.innerText = (main === 'Clear' || main === 'Clouds') ? 'Safe' : 'Not Safe';
-    mainLocation.innerText = cityName;   // always set so search results always update
+    if (main === 'Clear' || main === 'Clouds') {
+        eventSafe.style.background = "var(--safe-color)";
+        eventSafe.style.color = "var(--text-muted)";
+    } else {
+        eventSafe.style.background = "var(--unsafe-color)";
+        eventSafe.style.color = "var(--text-muted)";
+    }
+
+    mainLocation.innerText = cityName;
     temperature.innerText = Math.round(temp);
     season.innerText = description;
+
     view.forEach(image => {
         image.setAttribute('src', `./icons/${icon}.png`);
-        image.setAttribute('alt', `it is currently ${description}`);
+        image.onerror = () => {
+            image.src = `https://openweathermap.org/img/wn/${icon}@4x.png`;
+        };
+        image.setAttribute('alt', `It is currently ${description}`);
+        image.style.display = "block";
     });
 
     list.innerHTML = '';
@@ -150,6 +162,14 @@ function showWeatherDetails(data) {
     Object.values(dailyForecasts).slice(0, 5).forEach(day => {
         const div = document.createElement('div');
         div.innerHTML = renderOption(day);
+        const cardImg = div.querySelector('.sub-icon');
+        if (cardImg) {
+            cardImg.onerror = () => {
+                const nativeCode = day.weather[0].icon;
+                cardImg.src = `https://openweathermap.org/img/wn/${nativeCode}@2x.png`;
+            };
+        }
+
         list.appendChild(div);
     });
 }
