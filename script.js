@@ -1,4 +1,3 @@
-//get resources from index.html;
 const temperature = document.querySelector('.temperature');
 const season = document.querySelector('.season');
 const view = document.querySelectorAll('.view');
@@ -8,195 +7,244 @@ const mainLocation = document.querySelector('.location');
 const loader = document.querySelector('.loader');
 
 window.addEventListener('load', () => {
-    let long;
-    let lat;
     const setPosition = (position) => {
-        lat = 40.7143;
-        long = -74.006;
-        recieveGeoCoord(lat, long);
-    }
+        const lat = position.coords.latitude;
+        const long = position.coords.longitude;
+        receiveGeoCoord(lat, long);
+    };
+
     const showError = (error) => {
-        if(error){
-            handleError(error)
-            console.log('from showError error', error)
-            showSaved()
+        if (error) {
+            handleError(error);
+            showSaved();
         }
-    }
-    if(navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(setPosition, showError);
+    };
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(setPosition, showError, {
+            timeout: 10000,
+            enableHighAccuracy: false
+        });
     } else {
-       errorDisplay.innerHTML = '<p> BROWSER NOT SUPPORTED!! </p>';
+        errorDisplay.innerHTML = '<p>Geolocation not supported. Try searching instead.</p>';
     }
 });
-function showSaved () {
-    let savedWeather = JSON.parse(window.localStorage.getItem('weatherInfo'))
-    console.log('saved weathher', savedWeather);
-    if(savedWeather){
+
+function showSaved() {
+    const savedWeather = JSON.parse(window.localStorage.getItem('weatherInfo'));
+    if (savedWeather && savedWeather.list && savedWeather.list.length > 0) {
         const lastSave = document.querySelector('.saveMessage');
-        lastSave.innerHTML = `<p class="last-save">Showing last searched result`;
-        setTimeout(() => {
-            lastSave.innerHTML = '';
-        }, 3000);
-        showWeatherDetails(savedWeather);
+        if (lastSave) {
+            lastSave.innerHTML = '<p class="last-save">Showing your last saved result</p>';
+            setTimeout(() => { lastSave.innerHTML = ''; }, 3000);
+            showWeatherDetails(savedWeather);
+        }
     }
 }
-    // Sending the fetch data with the user search word
-    const fetchData = async (lat, long) => { //async on the 
-        const api = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${long}&exclude=hourly,minutely&units=metric&appid=putinakey`;
-        const response = await fetch(api);
-        return response;
-    }
 
-    const p = document.querySelector('.error');
-    function handleError(error) {
-        loader.className += ' hidden';
-        p.innerText = (error.code === 2) ? 'Internet not connected' : error.message;
-        errorDisplay.appendChild(p);
+const fetchData = async (lat, long) => {
+    loader.classList.remove('hidden');
+    const api = `/.netlify/functions/weather?lat=${lat}&lon=${long}`;
+    const response = await fetch(api);
+    if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || `API error: ${response.status}`);
+    }
+    return response;
+};
+
+function handleError(error) {
+    loader.classList.add('hidden');
+    const errorMsg = document.createElement('p');
+    errorMsg.className = 'error';
+    errorMsg.innerText = (error.code === 2)
+        ? 'No internet connection'
+        : (error.message || 'An error occurred');
+    errorDisplay.innerHTML = '';
+    errorDisplay.appendChild(errorMsg);
+}
+
+function renderOption(data) {
+    const { icon, main } = data.weather[0];
+    const { temp_max, temp_min } = data.main;
+    const date = new Date(data.dt * 1000);
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const day = days[date.getDay()];
+    return `
+    <div class="special">
+        <div class="sub">
+            <img class="sub-icon view" src="./icons/${icon}.png" alt="${day} is ${main}">
+            <h2 class="sub-season">${main}</h2>
+        </div>
+        <p class="style weekday">${day}</p>
+        <h3 class="side-temp">${Math.round(temp_max)} <span class='low-side-temp'>${Math.round(temp_min)}</span> <span class="degree">&deg;C</span></h3>
+    </div>`;
+}
+
+function showClock(timestamp, timezone = 0) {
+    const clock = document.querySelector('.clock');
+    try {
+        const localTimestamp = timestamp + timezone;
+        const date = new Date(localTimestamp * 1000);
+        let hours = date.getUTCHours();
+        const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        clock.innerText = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+    } catch (e) {
+        clock.innerText = new Date(timestamp * 1000).toLocaleTimeString();
+    }
+}
+
+function showDate(timestamp, element, timezone = 0) {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const date = new Date(timestamp * 1000);
+    const day = days[date.getDay()];
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+    const todate = date.getDate();
+    element.innerText = `${day}, ${todate} ${month} ${year}`;
+    showClock(timestamp, timezone);
+}
+
+function showWeatherDetails(data) {
+    if (!data || !data.city || !data.list || data.list.length === 0) {
+        handleError(new Error('Invalid weather data received'));
         return;
     }
 
-    function renderOption(data) {
-        const {icon, main} = data.weather[0];
-        const date = new Date(data.dt * 1000);
-        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-        const day = days[ date.getDay() ];
-        const {min, max} = data.temp;
-        return `
-        <div class="special">
-            <div class="sub">
-                <img class="sub-icon view" src="./icons/${icon}.png" alt="${day} is ${main}">
-                <h2 class="sub-season">${main}</h2>
-            </div>
-            <p class="style weekday">${day}</p>
-            <h3 class="side-temp">${Math.round(max)} <span class='low-side-temp'> ${Math.round(min)}</span></h3>
-            <h4 class="degree">&deg;C</h4>
-        </div>
-        `
+    const list = document.querySelector('.list');
+    const eventSafe = document.querySelector('.safe');
+    const cityName = data.city.name;
+    const timezone = data.city.timezone || 0;
+
+    const currentWeather = data.list[0];
+    const { temp } = currentWeather.main;
+    const { description, icon, main } = currentWeather.weather[0];
+    const dt = currentWeather.dt;
+
+    loader.classList.add('hidden');
+    eventSafe.innerText = (main === 'Clear' || main === 'Clouds') ? 'Safe' : 'Not Safe';
+    if (main === 'Clear' || main === 'Clouds') {
+        eventSafe.style.background = "var(--safe-color)";
+        eventSafe.style.color = "var(--text-muted)";
+    } else {
+        eventSafe.style.background = "var(--unsafe-color)";
+        eventSafe.style.color = "var(--text-muted)";
     }
 
-    function showClock(timestamp) {
-        const clock = document.querySelector('.clock');
-        let time = new Date(timestamp * 1000);
-        clock.innerText = time.toLocaleTimeString();
-    }
+    mainLocation.innerText = cityName;
+    temperature.innerText = Math.round(temp);
+    season.innerText = description;
 
-    function showDate(timestamp, element) {
-        const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-        const months = [
-            'Jan',  'Feb',
-            'Mar',  'Apr',
-            'May',  'Jun',
-            'Jul',  'Aug',
-            'Sep',  'Oct',
-            'Nov',  'Dec'
-        ];
-        //this should get the date.
-        const date =  new Date(timestamp * 1000);
-        let day     = days[ date.getDay() ];
-        let month   = months[ date.getMonth() ];
-        let year    = date.getFullYear();
-        let todate  = date.getDate();
-        //  whole day format. 
-        let theDate =  `${day}, ${todate} ${month} ${year}`;
-        element.innerText = theDate;
-        showClock(timestamp);
-    }
+    view.forEach(image => {
+        image.setAttribute('src', `./icons/${icon}.png`);
+        image.onerror = () => {
+            image.src = `https://openweathermap.org/img/wn/${icon}@4x.png`;
+        };
+        image.setAttribute('alt', `It is currently ${description}`);
+        image.style.display = "block";
+    });
 
-    function showWeatherDetails(data) {
-        const list = document.querySelector('.list');
-        const eventSafe = document.querySelector('.safe');
-        const {timezone} = data;
-        const {temp, dt} = data.current;
-        const {description,icon, main} = data.current.weather[0];
-        loader.className += ' hidden';
+    list.innerHTML = '';
+    showDate(dt, weekday, timezone);
 
-        eventSafe.innerText = (main === 'Clear' || main === 'Clouds') ? 'Safe' : 'Not Safe';
-        (!mainLocation.innerText) ? mainLocation.innerText = timezone : '';
-        temperature.innerText = Math.round(temp);
-        season.innerText = description;
-        view.forEach(image => {
-            image.setAttribute('src', `./icons/${icon}.png`);
-            image.setAttribute('alt', `it is currently ${description}`);
-        });
-        list.innerHTML = '';
-        showDate(dt, weekday)
-        const daily = data.daily.slice(0, 5);
-        for(let day of daily){
-            const div = document.createElement('div');
-            div.innerHTML = renderOption(day);
-           list.appendChild(div);
+    const dailyForecasts = {};
+    data.list.forEach(forecast => {
+        const dateKey = new Date(forecast.dt * 1000).toDateString();
+        if (!dailyForecasts[dateKey] || forecast.dt_txt.includes('12:00:00')) {
+            dailyForecasts[dateKey] = forecast;
         }
-    }
+    });
 
-const recieveGeoCoord = (lat, long) => {
-    fetchData(lat, long).then(response => {
-        return response.json();
-    }).then(data => {
-        window.localStorage.setItem('weatherInfo', JSON.stringify(data))
-        showWeatherDetails(data);
-    }).catch(err => {
-        showSaved();
-        handleError(err);
-    } );
+    Object.values(dailyForecasts).slice(0, 5).forEach(day => {
+        const div = document.createElement('div');
+        div.innerHTML = renderOption(day);
+        const cardImg = div.querySelector('.sub-icon');
+        if (cardImg) {
+            cardImg.onerror = () => {
+                const nativeCode = day.weather[0].icon;
+                cardImg.src = `https://openweathermap.org/img/wn/${nativeCode}@2x.png`;
+            };
+        }
+
+        list.appendChild(div);
+    });
 }
+
+const receiveGeoCoord = (lat, long) => {
+    fetchData(lat, long)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.list) {
+                window.localStorage.setItem('weatherInfo', JSON.stringify(data));
+                showWeatherDetails(data);
+            }
+        })
+        .catch(err => {
+            showSaved();
+            handleError(err);
+        });
+};
 
 const inputFetch = async (search) => {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${search}&appid=putinakey`;
+    const url = `/.netlify/functions/weather?city=${encodeURIComponent(search)}`;
     const response = await fetch(url);
-    return response; 
-}
+    if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || `API error: ${response.status}`);
+    }
+    return response;
+};
 
 const inputShield = (func, delay = 1000) => {
     let timeOutID;
     return (...args) => {
-        if(timeOutID) {
-            clearTimeout(timeOutID)
-        }
-        timeOutID = setTimeout(() => {
-            func.apply(null, args)
-        }, delay);
-    }
-}
+        if (timeOutID) clearTimeout(timeOutID);
+        timeOutID = setTimeout(() => func.apply(null, args), delay);
+    };
+};
 
-const onInput = async (event) => { 
-    if (event.target.value) { 
-        loader.className = 'loader';
-        const movies = await inputFetch(event.target.value)
-        .then(response => {
-            return response.json();
-        }).then(data => {
+const onInput = async (event) => {
+    const query = event.target.value.trim();
+    if (!query) return;
+
+    loader.classList.remove('hidden');
+    errorDisplay.innerHTML = '';
+
+    inputFetch(query)
+        .then(response => response.json())
+        .then(data => {
             console.log('FROM INPUT', data);
-            if (data.cod == "404") {
-                handleError(data);
-            }
-            if(data.coord){
-                const lat = data.coord.lat;
-                const lon = data.coord.lon;
-                errorDisplay.innerHTML = '';
-                mainLocation.innerText = data.name;
-                recieveGeoCoord(lat, lon);
-            }
-        }).catch(err => {
-            showSaved();
-            console.log('from input error', err)
-            handleError(err);
+            window.localStorage.setItem('weatherInfo', JSON.stringify(data));
+            showWeatherDetails(data);
         })
-    } else { 
-        return;
-    }
+        .catch(err => {
+            console.log('from input error', err);
+            showSaved();
+            handleError(err);
+        });
 };
 
 const inputBox = document.querySelector('#search');
-inputBox.addEventListener('input', inputShield(onInput, 1000) );
+inputBox.addEventListener('input', inputShield(onInput, 1000));
+
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('./sw.js')
-      .then(function(registration) {
-        // Regsuccessful
-        console.log('ServiceWorker registration successful:', registration.scope);
-      }, function(err) {
-        //failed 
-        console.log('ServiceWorker registration failed: ', err);
-      });
+    window.addEventListener('load', async () => {
+        try {
+            const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname);
+            if (isLocal) {
+                console.log('SW disabled in local dev');
+                return;
+            }
+            const reg = await navigator.serviceWorker.register('./sw.js', {
+                scope: './'
+            });
+            console.log('ServiceWorker registered:', reg.scope);
+        } catch (err) {
+            console.error('ServiceWorker registration failed:', err);
+        }
     });
 }

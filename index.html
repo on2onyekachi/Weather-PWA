@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="#3367D6">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#c9f8f8c5">
     <meta name="apple-mobile-web-app-title" content="Weather PWA">
 
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -14,25 +14,27 @@
     <link rel="mask-icon" href="safari-pinned-tab.svg" color="#1f9abd">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#3367D6">
-    
+
+    <link rel="link" rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/4804/4804187.png">
     <title>Weather App</title>
     <link rel="stylesheet" href="main.css">
 </head>
 <body>
     <section>
+        <div class="loader"></div>
         <header>
-            <img class="icon" src="./icons/unknown.png" title="Smash-It weather app" alt="App icon">
-            <h1><span class="weather">Weather </span>Forecast</h1>
+            <div class="brand-wrapper">
+                <img class="icon" src="./icons/unknown.png"
+                    onerror="this.src='https://cdn-icons-png.flaticon.com/512/4804/4804187.png'"
+                    title="Kachi weather app" alt="App icon">
+                <h1><span class="weather">Weather</span> Forecast</h1>
+            </div>
             <div class="search-wrapper">
-                <label for="search" class="search-label" >Search:</label>
-                <input type="text" id="search" placeholder="e.g New York City, US">
+                <input type="text" id="search" placeholder="Search City (e.g. New York, US)...">
             </div>
         </header>
-        <div class="errorMessage"><p class="error"></p></div>
+        <div class="errorMessage"></div>
         <div class="saveMessage"></div>
-        <div class="loader">
-            <img src="./icons/loader.gif" alt="loading...">
-        </div>
         <div class="container">
             <div class="left-item">
                 <div class="list"></div>
@@ -41,21 +43,21 @@
                 <div class="in-left">
                     <div class="in-center">
                         <div class="special main-right">
+                            <h3 class="main-date temperature">--</h3>
+                            <h2 class="main-degree">&deg;C</h2>
                             <div class="main">
-                                <img class="main-icon view" src="./icons/unknown.png" alt="">
-                                <h2 class="main-season season">N/R</h2>
+                                <h2 class="main-season season">Loading...</h2>
                                 <h3 class="safe"></h3>
                             </div>
-                            <h3 class="main-date temperature">0</h3>
-                            <h2 class="main-degree">&deg;C</h2>
                         </div>
-                        <h1 class="date weekday">N/R</h1>
-                        <h2 class="location"></h2>
-                        <h3 class="clock">N/R</h3>
+                        <h1 class="date weekday">----</h1>
+                        <h2 class="location">Detecting Location...</h2>
+                        <h3 class="clock">00:00:00 AM</h3>
                     </div>
                 </div>
                 <div class="in-right">
-                    <img class="season-icon view" src="./icons/unknown.png" alt="">
+                    <img class="season-icon view" src="./icons/unknown.png" onerror="this.style.display='none'"
+                        alt="Weather State Illustration">
                 </div>
             </div>
         </div>
